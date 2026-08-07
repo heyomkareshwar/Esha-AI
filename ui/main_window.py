@@ -12,6 +12,8 @@ from PySide6.QtWidgets import (
 from vision.camera import Camera
 from vision.detector import Detector
 
+from assistant.speaker import Speaker
+
 from ui.object_panel import ObjectPanel
 from ui.controls import Controls
 from ui.status_bar import AIStatusBar
@@ -29,6 +31,8 @@ class MainWindow(QMainWindow):
 
         self.camera = Camera()
         self.detector = Detector()
+
+        self.speaker = Speaker()
 
         self.fps = FPSCounter()
         self.state = VisionState()
@@ -64,8 +68,16 @@ class MainWindow(QMainWindow):
         self.controls.stop_btn.clicked.connect(self.stop_camera)
 
     def start_camera(self):
-        if self.camera.start():
-            self.timer.start(30)
+     if self.camera.start():
+
+        self.speaker.speak("Camera Started")
+
+        self.timer.start(30)
+
+        self.ai_status.update_status(
+            0,
+            True
+        )
 
     def update_frame(self):
         ok, frame = self.camera.read()
