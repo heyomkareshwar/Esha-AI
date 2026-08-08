@@ -20,6 +20,7 @@ from ui.status_bar import AIStatusBar
 
 from vision.fps import FPSCounter
 from assistant.vision_state import VisionState
+from assistant.cooldown import SpeechCooldown
 
 
 class MainWindow(QMainWindow):
@@ -33,6 +34,8 @@ class MainWindow(QMainWindow):
         self.detector = Detector()
 
         self.speaker = Speaker()
+        self.speech_cooldown = SpeechCooldown(5)
+        self.last_objects = set()
 
         self.fps = FPSCounter()
         self.state = VisionState()
@@ -96,6 +99,13 @@ class MainWindow(QMainWindow):
         self.state.update(detected)
         self.object_panel.update_objects(detected)
 
+        if detected:
+            names = [name for name, confidence in detected]
+
+            message = "I can see " + ", ".join(names)
+
+            self.speaker.speak(message)
+
         self.fps.update()
         self.ai_status.update_status(
             self.fps.value(),
@@ -130,6 +140,48 @@ class MainWindow(QMainWindow):
         self.view.clear()
         self.view.setText("Camera Preview")
         self.ai_status.update_status(0, False)
+
+    def speak_detected_objects(self, objects):
+
+        if not objects:
+            return
+
+        current_objects = set(
+            name for name, confidence in objects
+        )
+
+        if current_objects == self.last_objects:
+            return
+
+        if not self.speech_cooldown.can_speak():
+            return
+
+        names = sorted(current_objects)
+
+        if len(names) == 1:
+            sentence = f"I can see a {names[0]}."
+
+        elif len(names) == 2:
+            sentence = (
+                f"I can see a {names[0]} "
+                f"and a {names[1]}."
+            )
+
+        else:
+            first = ", ".join(
+                f"a {name}" for name in names[:-1]
+            )
+
+            sentence = (
+                f"I can see {first}, "
+                f"and a {names[-1]}."
+            )
+
+        self.speaker.speak(sentence)
+
+        self.last_objects = current_objects
+
+        self.speech_cooldown.reset()
 
     def closeEvent(self, event):
         self.stop_camera()
