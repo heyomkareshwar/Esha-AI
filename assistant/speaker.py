@@ -9,15 +9,32 @@ class Speaker:
         self.engine.setProperty("rate", 165)
         self.engine.setProperty("volume", 1.0)
 
-        # Force Microsoft Zira female voice
-        zira_id = (
-            r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech"
-            r"\Voices\Tokens\TTS_MS_EN-US_ZIRA_11.0"
-        )
-
-        self.engine.setProperty("voice", zira_id)
-
-        print("Selected voice: Microsoft Zira Desktop")
+        # Set female voice
+        voices = self.engine.getProperty("voices")
+        
+        # Try to find Zira (female voice)
+        female_voice = None
+        for voice in voices:
+            if "zira" in voice.name.lower():
+                female_voice = voice.id
+                break
+        
+        # If Zira not found, use first female voice available
+        if female_voice is None:
+            for voice in voices:
+                if voice.gender.lower() == "female":
+                    female_voice = voice.id
+                    break
+        
+        # Fallback: use voice at index 1 (usually female on Windows)
+        if female_voice is None and len(voices) > 1:
+            female_voice = voices[1].id
+        
+        if female_voice:
+            self.engine.setProperty("voice", female_voice)
+            print(f"Selected voice: {voices[0].name if not female_voice else 'Female voice'}")
+        else:
+            print("No female voice available")
 
     def speak(self, text):
         print("Esha:", text)
