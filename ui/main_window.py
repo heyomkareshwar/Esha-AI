@@ -14,6 +14,9 @@ from vision.detector import Detector
 
 from assistant.speaker import Speaker
 
+from assistant.speech import SpeechRecognizer
+from assistant.commands import CommandHandler
+
 from ui.object_panel import ObjectPanel
 from ui.controls import Controls
 from ui.status_bar import AIStatusBar
@@ -34,6 +37,8 @@ class MainWindow(QMainWindow):
         self.detector = Detector()
 
         self.speaker = Speaker()
+        self.speech = SpeechRecognizer()
+        self.commands = CommandHandler()
         self.speech_cooldown = SpeechCooldown(5)
         self.last_objects = set()
 
@@ -69,6 +74,9 @@ class MainWindow(QMainWindow):
 
         self.controls.start_btn.clicked.connect(self.start_camera)
         self.controls.stop_btn.clicked.connect(self.stop_camera)
+        self.controls.voice_btn.clicked.connect(
+            self.voice_command
+        )
 
     def start_camera(self):
      if self.camera.start():
@@ -140,6 +148,30 @@ class MainWindow(QMainWindow):
         self.view.clear()
         self.view.setText("Camera Preview")
         self.ai_status.update_status(0, False)
+
+    def voice_command(self):
+
+        self.ai_status.showMessage(
+            "Listening..."
+        )
+
+        command = self.speech.listen()
+
+        if not command:
+            self.ai_status.showMessage(
+                "I couldn't understand you."
+            )
+            return
+
+        response = self.commands.execute(command)
+
+        print("Esha:", response)
+
+        self.speaker.speak(response)
+
+        self.ai_status.showMessage(
+            f"You: {command}"
+        )
 
     def speak_detected_objects(self, objects):
 
