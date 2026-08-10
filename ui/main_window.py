@@ -30,7 +30,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("🤖 Esha AI")
+        self.setWindowTitle("🤖 Isha AI")
         self.resize(1400, 800)
 
         self.camera = Camera()
@@ -165,7 +165,7 @@ class MainWindow(QMainWindow):
 
         response = self.commands.execute(command)
 
-        print("Esha:", response)
+        print("Isha:", response)
 
         self.speaker.speak(response)
 

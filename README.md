@@ -1,4 +1,4 @@
-# 🤖 Esha AI
+# 🤖 Isha AI
 
 A desktop AI assistant that can see, hear, understand and assist using Computer Vision and AI.
 

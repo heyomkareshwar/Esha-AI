@@ -37,7 +37,7 @@ class Speaker:
             print("No female voice available")
 
     def speak(self, text):
-        print("Esha:", text)
+        print("Isha:", text)
 
         self.engine.stop()
         self.engine.say(text)

@@ -18,7 +18,7 @@ class Controls(QWidget):
 
         self.capture_btn = QPushButton("📸 Capture")
 
-        self.voice_btn = QPushButton("🎤 Talk to Esha")
+        self.voice_btn = QPushButton("🎤 Talk to Isha")
 
         layout.addWidget(self.start_btn)
 
