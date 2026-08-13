@@ -1,8 +1,8 @@
 from assistant.state import AssistantState
 from assistant.speech import SpeechRecognizer
 from assistant.wake_sound import WakeSound
-from assistant.commands import CommandHandler
 from assistant.speaker import Speaker
+from assistant.brain import IshaBrain
 
 
 class IshaCore:
@@ -12,8 +12,8 @@ class IshaCore:
 
         self.speech = SpeechRecognizer()
         self.wake_sound = WakeSound()
-        self.commands = CommandHandler()
         self.speaker = Speaker()
+        self.brain = IshaBrain()
 
     def set_state(self, state):
         self.state = state
@@ -42,6 +42,7 @@ class IshaCore:
             )
 
             if "isha" in text:
+
                 self.set_state(
                     AssistantState.WAKE
                 )
@@ -66,18 +67,12 @@ class IshaCore:
             AssistantState.THINKING
         )
 
-        if not command:
+        result = self.brain.think(command)
 
-            response = (
-                "I didn't hear a command."
-            )
+        response = result["response"]
 
-            self.speak(response)
-
-            return
-
-        response = self.commands.execute(
-            command
+        print(
+            f"[ISHA] Intent: {result['type']}"
         )
 
         self.speak(response)
@@ -104,13 +99,8 @@ class IshaCore:
 
     def run(self):
 
-        print(
-            "\n🤖 Isha is ready."
-        )
-
-        print(
-            "Say 'Isha' to wake me up."
-        )
+        print("\n🤖 Isha is ready.")
+        print("Say 'Isha' to wake me up.")
 
         while True:
 
@@ -120,13 +110,7 @@ class IshaCore:
 
             except KeyboardInterrupt:
 
-                print(
-                    "\n🛑 Isha stopped."
-                )
-
-                self.set_state(
-                    AssistantState.IDLE
-                )
+                print("\n🛑 Isha stopped.")
 
                 break
 
