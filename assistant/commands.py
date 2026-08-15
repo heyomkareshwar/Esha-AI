@@ -10,6 +10,70 @@ class CommandHandler:
 
         command = command.lower().strip()
 
+        # -----------------------------
+        # YouTube Search
+        # -----------------------------
+
+        if (
+            "search youtube for " in command
+        ):
+            query = command.split(
+                "search youtube for ",
+                1
+            )[1]
+
+            if self.automation.search_youtube(query):
+                return f"Searching YouTube for {query}."
+
+            return "What should I search for?"
+
+        if (
+            "search on youtube for " in command
+        ):
+            query = command.split(
+                "search on youtube for ",
+                1
+            )[1]
+
+            if self.automation.search_youtube(query):
+                return f"Searching YouTube for {query}."
+
+            return "What should I search for?"
+
+        if (
+            "search youtube " in command
+        ):
+            query = command.split(
+                "search youtube ",
+                1
+            )[1]
+
+            if self.automation.search_youtube(query):
+                return f"Searching YouTube for {query}."
+
+            return "What should I search for?"
+
+        # -----------------------------
+        # Google Search
+        # -----------------------------
+
+        if (
+            "search google for " in command
+        ):
+            query = command.split(
+                "search google for ",
+                1
+            )[1]
+
+            if self.automation.search_google(query):
+                return f"Searching Google for {query}."
+
+            return "What should I search for?"
+
+        # -----------------------------
+        # Open Websites
+        # -----------------------------
+
         if "open youtube" in command:
             self.automation.open_youtube()
             return "Opening YouTube."
@@ -25,6 +89,10 @@ class CommandHandler:
         if "open gmail" in command:
             self.automation.open_gmail()
             return "Opening Gmail."
+
+        # -----------------------------
+        # Windows Apps
+        # -----------------------------
 
         if "open calculator" in command:
             self.automation.open_calculator()

@@ -3,3 +3,7 @@ opencv-python
 ultralytics
 numpy
 pillow
+SpeechRecognition
+PyAudio
+sounddevice
+soundfile
