@@ -8,17 +8,28 @@ import os
 class SpeechRecognizer:
 
     def __init__(self):
+
         self.recognizer = sr.Recognizer()
+
+        # Make recognition more responsive
+        self.recognizer.energy_threshold = 300
+        self.recognizer.dynamic_energy_threshold = True
+        self.recognizer.pause_threshold = 0.7
+        self.recognizer.phrase_threshold = 0.2
+        self.recognizer.non_speaking_duration = 0.3
 
         self.sample_rate = 16000
         self.channels = 1
-        self.record_seconds = 5
+
+        # Shorter recording for faster response
+        self.record_seconds = 4
 
     def listen(self):
 
         print("\n🎤 Listening...")
 
         try:
+
             audio_data = sd.rec(
                 int(
                     self.record_seconds *
@@ -32,12 +43,18 @@ class SpeechRecognizer:
             sd.wait()
 
         except Exception as error:
-            print("Microphone error:", error)
+
+            print(
+                "Microphone error:",
+                error
+            )
+
             return ""
 
         temp_file = None
 
         try:
+
             with tempfile.NamedTemporaryFile(
                 suffix=".wav",
                 delete=False
@@ -61,13 +78,19 @@ class SpeechRecognizer:
                 audio
             )
 
-            print("You:", text)
+            print(
+                "You:",
+                text
+            )
 
-            return text.lower()
+            return text.lower().strip()
 
         except sr.UnknownValueError:
 
-            print("Could not understand.")
+            print(
+                "Could not understand."
+            )
+
             return ""
 
         except sr.RequestError as error:
@@ -81,7 +104,8 @@ class SpeechRecognizer:
 
         finally:
 
-            if temp_file and os.path.exists(
+            if (
                 temp_file
+                and os.path.exists(temp_file)
             ):
                 os.remove(temp_file)
