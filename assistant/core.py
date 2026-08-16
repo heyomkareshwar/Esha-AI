@@ -41,15 +41,28 @@ class IshaCore:
                 f"[ISHA] Heard: {text}"
             )
 
-            if "isha" in text:
+            if "isha" not in text:
+                continue
 
-                self.set_state(
-                    AssistantState.WAKE
+            self.set_state(
+                AssistantState.WAKE
+            )
+
+            self.wake_sound.play()
+
+            command = text.replace(
+                "isha",
+                "",
+                1
+            ).strip()
+
+            if command:
+                print(
+                    f"[ISHA] Direct command: {command}"
                 )
+                return command
 
-                self.wake_sound.play()
-
-                return True
+            return None
 
     def listen_for_command(self):
 
@@ -91,10 +104,13 @@ class IshaCore:
 
     def run_once(self):
 
-        self.wait_for_wake_word()
+        command = self.wait_for_wake_word()
+
+        if command:
+            self.process_command(command)
+            return
 
         command = self.listen_for_command()
-
         self.process_command(command)
 
     def run(self):
