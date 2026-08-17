@@ -1,5 +1,6 @@
 from assistant.commands import CommandHandler
 from assistant.memory import Memory
+from assistant.llm_brain import LLMBrain
 
 
 class IshaBrain:
@@ -7,12 +8,14 @@ class IshaBrain:
     def __init__(self):
         self.commands = CommandHandler()
         self.memory = Memory()
+        self.llm = LLMBrain()
 
     # ==========================================
     # MEMORY RESPONSE HELPER
     # ==========================================
 
     def _response(self, response, response_type):
+
         self.memory.add(
             "assistant",
             response
@@ -43,10 +46,11 @@ class IshaBrain:
             text
         )
 
-        # Remove wake word if present
+        # Remove wake word
         text = text.replace(
             "isha",
-            ""
+            "",
+            1
         ).strip()
 
         # ==========================================
@@ -69,11 +73,10 @@ class IshaBrain:
                 "hello",
                 "hi",
                 "hey",
-                "hii",
-                "hello isha",
-                "hey isha"
+                "hii"
             ]
         ):
+
             return self._response(
                 "Hello. I'm Isha. How can I help you?",
                 "conversation"
@@ -88,6 +91,7 @@ class IshaBrain:
             or "what are you" in text
             or "tell me about yourself" in text
         ):
+
             return self._response(
                 "I'm Isha, your desktop AI assistant.",
                 "conversation"
@@ -102,11 +106,11 @@ class IshaBrain:
             or "what do you do" in text
             or "your capabilities" in text
         ):
+
             return self._response(
                 "I can control supported desktop applications, "
-                "open websites, interact with your computer, "
-                "use my vision system, remember our recent "
-                "conversation, and assist you with tasks.",
+                "open websites, use my vision system, remember "
+                "our recent conversation, and help you with tasks.",
                 "conversation"
             )
 
@@ -119,6 +123,7 @@ class IshaBrain:
             or "are you listening" in text
             or "you there" in text
         ):
+
             return self._response(
                 "Yes. I'm here.",
                 "conversation"
@@ -133,6 +138,7 @@ class IshaBrain:
             or "thanks" in text
             or "thankyou" in text
         ):
+
             return self._response(
                 "You're welcome.",
                 "conversation"
@@ -150,55 +156,10 @@ class IshaBrain:
                 "good night"
             ]
         ):
+
             return self._response(
                 "Alright. I'll be here when you need me.",
                 "conversation"
-            )
-
-        # ==========================================
-        # DESKTOP ACTIONS
-        # ==========================================
-
-        action_words = (
-            "open ",
-            "launch ",
-            "start ",
-            "run "
-        )
-
-        if text.startswith(action_words):
-
-            response = self.commands.execute(
-                text
-            )
-
-            return self._response(
-                response,
-                "action"
-            )
-
-        # ==========================================
-        # DIRECT COMMANDS
-        # ==========================================
-
-        if (
-            "youtube" in text
-            or "calculator" in text
-            or "notepad" in text
-            or "github" in text
-            or "gmail" in text
-            or "google" in text
-            or "vs code" in text
-            or "file explorer" in text
-        ):
-
-            response = self.commands.execute(
-                text
-            )
-
-            return self._response(
-                response,
-                "action"
             )
 
         # ==========================================
@@ -250,10 +211,82 @@ class IshaBrain:
             )
 
         # ==========================================
-        # UNKNOWN REQUEST
+        # DESKTOP ACTIONS
         # ==========================================
 
+        action_words = (
+            "open ",
+            "launch ",
+            "start ",
+            "run "
+        )
+
+        if text.startswith(action_words):
+
+            response = self.commands.execute(
+                text
+            )
+
+            return self._response(
+                response,
+                "action"
+            )
+
+        # ==========================================
+        # DIRECT COMMANDS
+        # ==========================================
+
+        if (
+            "youtube" in text
+            or "calculator" in text
+            or "notepad" in text
+            or "github" in text
+            or "gmail" in text
+            or "google" in text
+            or "vs code" in text
+            or "file explorer" in text
+        ):
+
+            response = self.commands.execute(
+                text
+            )
+
+            return self._response(
+                response,
+                "action"
+            )
+
+        # ==========================================
+        # LLM FALLBACK
+        # ==========================================
+
+        prompt = f"""
+You are Isha, a friendly desktop AI assistant.
+
+Rules:
+- Answer naturally and briefly.
+- Keep responses suitable for speaking aloud.
+- Do not claim that you performed an action unless a tool actually performed it.
+- Do not invent information about the user's computer.
+- If the user asks a normal knowledge or conversational question,
+  answer it directly.
+- If the request requires a computer action that is not available,
+  honestly say that you cannot perform it yet.
+
+Recent conversation:
+{self.memory.recent(6)}
+
+User:
+{text}
+
+Isha:
+"""
+
+        response = self.llm.ask(
+            prompt
+        )
+
         return self._response(
-            "I don't know how to do that yet.",
-            "unknown"
+            response,
+            "llm"
         )
