@@ -260,31 +260,33 @@ class IshaBrain:
         # LLM FALLBACK
         # ==========================================
 
+        history = "\n".join(
+            f"{item['role']}: {item['text']}"
+            for item in self.memory.recent(10)
+        )
+
         prompt = f"""
 You are Isha, a friendly desktop AI assistant.
 
 Rules:
 - Answer naturally and briefly.
 - Keep responses suitable for speaking aloud.
+- Use the recent conversation to understand follow-up questions.
+- Remember references such as "he", "she", "it", "that", and "this".
 - Do not claim that you performed an action unless a tool actually performed it.
 - Do not invent information about the user's computer.
-- If the user asks a normal knowledge or conversational question,
-  answer it directly.
-- If the request requires a computer action that is not available,
-  honestly say that you cannot perform it yet.
+- If the user asks a normal knowledge or conversational question, answer it directly.
 
 Recent conversation:
-{self.memory.recent(6)}
+{history}
 
-User:
+Current user:
 {text}
 
 Isha:
 """
 
-        response = self.llm.ask(
-            prompt
-        )
+        response = self.llm.ask(prompt)
 
         return self._response(
             response,
