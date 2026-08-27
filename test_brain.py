@@ -3,11 +3,16 @@ from assistant.brain import IshaBrain
 
 brain = IshaBrain()
 
+
 tests = [
     "who is Elon Musk",
     "what company does he own",
     "tell me more about it",
+    "why is it famous",
+    "I'm bored",
+    "tell me a joke",
 ]
+
 
 for command in tests:
 

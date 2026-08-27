@@ -1,3 +1,5 @@
+from copy import replace
+
 from assistant.commands import CommandHandler
 from assistant.memory import Memory
 from assistant.llm_brain import LLMBrain
@@ -257,34 +259,45 @@ class IshaBrain:
             )
 
         # ==========================================
-        # LLM FALLBACK
+        # NATURAL CONVERSATION — LLM
         # ==========================================
 
-        history = "\n".join(
-            f"{item['role']}: {item['text']}"
-            for item in self.memory.recent(10)
+        history = self.memory.recent(10)
+
+        conversation = "\n".join(
+            f"{item['role'].upper()}: {item['text']}"
+            for item in history
         )
 
         prompt = f"""
-You are Isha, a friendly desktop AI assistant.
+You are Isha, a smart and friendly desktop AI assistant.
 
-Rules:
-- Answer naturally and briefly.
-- Keep responses suitable for speaking aloud.
-- Use the recent conversation to understand follow-up questions.
-- Remember references such as "he", "she", "it", "that", and "this".
-- Do not claim that you performed an action unless a tool actually performed it.
+Your personality:
+- Friendly
+- Natural
+- Calm
+- Slightly witty
+- Helpful
+- Concise
+
+Conversation rules:
+- Understand the context of previous messages.
+- Remember who or what the user is talking about.
+- Understand words like "he", "she", "it", "that", "this", "there", etc.
+- If the user asks a follow-up question, use previous conversation to understand it.
+- Do not repeat information unnecessarily.
+- Keep normal answers short because they will be spoken aloud.
+- Do not claim to perform computer actions unless a tool actually performed them.
 - Do not invent information about the user's computer.
-- If the user asks a normal knowledge or conversational question, answer it directly.
 
-Recent conversation:
-{history}
+        Recent conversation:
+        {conversation}
 
-Current user:
-{text}
+        Current user message:
+        {text}
 
-Isha:
-"""
+        Respond naturally as Isha.
+        """
 
         response = self.llm.ask(prompt)
 
