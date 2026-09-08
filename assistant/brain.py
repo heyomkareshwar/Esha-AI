@@ -1,8 +1,8 @@
-from copy import replace
-
 from assistant.commands import CommandHandler
 from assistant.memory import Memory
 from assistant.llm_brain import LLMBrain
+from assistant.gemini_vision import GeminiVision
+from assistant.screen_vision import ScreenVision
 
 
 class IshaBrain:
@@ -11,6 +11,8 @@ class IshaBrain:
         self.commands = CommandHandler()
         self.memory = Memory()
         self.llm = LLMBrain()
+        self.screen = ScreenVision()
+        self.vision = GeminiVision()
 
     # ==========================================
     # MEMORY RESPONSE HELPER
@@ -211,6 +213,57 @@ class IshaBrain:
                 "I haven't responded yet.",
                 "memory"
             )
+
+        # ==========================================
+        # SCREEN VISION
+        # ==========================================
+
+        vision_phrases = [
+            "what's on my screen",
+            "what is on my screen",
+            "what do you see on my screen",
+            "look at my screen",
+            "look at the screen",
+            "read my screen",
+            "read the screen",
+            "analyze my screen",
+            "analyze the screen"
+        ]
+
+        if any(
+            phrase in text
+            for phrase in vision_phrases
+        ):
+
+            try:
+
+                image = self.screen.capture()
+
+                response = self.vision.analyze(
+                    image,
+                    "Look at this screenshot and describe "
+                    "what is visible on the screen. "
+                    "Focus on useful details. "
+                    "Keep the answer concise because it "
+                    "will be spoken aloud."
+                )
+
+                return self._response(
+                    response,
+                    "vision"
+                )
+
+            except Exception as error:
+
+                print(
+                    "[VISION ERROR]",
+                    error
+                )
+
+                return self._response(
+                    "I'm having trouble seeing your screen right now.",
+                    "vision"
+                )
 
         # ==========================================
         # DESKTOP ACTIONS
