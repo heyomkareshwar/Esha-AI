@@ -3,6 +3,7 @@ from assistant.memory import Memory
 from assistant.llm_brain import LLMBrain
 from assistant.gemini_vision import GeminiVision
 from assistant.screen_vision import ScreenVision
+from assistant.computer_control import ComputerControl
 
 
 class IshaBrain:
@@ -13,6 +14,7 @@ class IshaBrain:
         self.llm = LLMBrain()
         self.screen = ScreenVision()
         self.vision = GeminiVision()
+        self.computer = ComputerControl()
 
     # ==========================================
     # MEMORY RESPONSE HELPER
@@ -264,7 +266,40 @@ class IshaBrain:
                     "I'm having trouble seeing your screen right now.",
                     "vision"
                 )
+                # ==========================================
+        # COMPUTER CONTROL
+        # ==========================================
 
+        if text.startswith("move mouse to "):
+
+            coordinates = text.replace(
+                "move mouse to ",
+                "",
+                1
+            ).strip()
+
+            try:
+                x, y = map(
+                    int,
+                    coordinates.replace(",", " ").split()
+                )
+
+                self.computer.move_mouse(
+                    x,
+                    y
+                )
+
+                return self._response(
+                    f"Moved the mouse to {x}, {y}.",
+                    "computer"
+                )
+
+            except ValueError:
+
+                return self._response(
+                    "Please give me valid X and Y coordinates.",
+                    "computer"
+                )
         # ==========================================
         # DESKTOP ACTIONS
         # ==========================================
